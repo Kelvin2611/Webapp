@@ -112,7 +112,7 @@
   </form>
 
   <script>
-    const logoBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA6KADAAQAAAABAAAA2QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA2QDoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAgICAgICAwICAwUDAwMFBgUFBQUGCAYGBgYGCAoICAgICAgKCgoKCgoKCgwMDAwMDA4ODg4ODw8PDw8PDw8PD//bAEMBAgICBAQEBwQEBxALCQsQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEP/dAAQAD//aAAwDAQACEQMRAD8A/OOiiigA..."; // Truncated for readability
+    const logoBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA6KADAAQAAAABAAAA2QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA2QDoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//..."; // Replace with full Base64 logo
 
     function enableSignature(canvasId) {
       const canvas = document.getElementById(canvasId);
@@ -165,56 +165,15 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Add the logo
+      // Add the logo at the top
       doc.addImage(logoBase64, "JPEG", 10, 10, 50, 20);
 
-      // Add form fields to PDF
+      // Add form details
       const site = document.getElementById("site").value;
-      const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
-      const clientPO = document.getElementById("client-po").value;
-      const engineer = document.getElementById("engineer-name").value;
-      const dateStarted = document.getElementById("date-started").value;
-      const completedOn = document.getElementById("completed-on").value;
-      const worksCarriedOut = document.getElementById("works-carried-out").value;
+      doc.text(`Site: ${site}`, 10, 40);
 
-      let y = 40;
-      doc.text(`Site: ${site}`, 10, y); y += 10;
-      doc.text(`Client: ${client}`, 10, y); y += 10;
-      doc.text(`Client PO Number: ${clientPO}`, 10, y); y += 10;
-      doc.text(`Engineer: ${engineer}`, 10, y); y += 10;
-      doc.text(`Date Started: ${dateStarted}`, 10, y); y += 10;
-      doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
-      doc.text("Works Carried Out:", 10, y); y += 10;
-      doc.text(worksCarriedOut, 10, y); y += 20;
-
-      // Add client signature
-      const clientCanvas = document.getElementById("client-signature");
-      const clientSignature = clientCanvas.toDataURL("image/png");
-      doc.addImage(clientSignature, "PNG", 10, y, 90, 30);
-      y += 40;
-
-      // Add photographs
-      const photos = document.getElementById("photos").files;
-      for (let i = 0; i < photos.length; i++) {
-        const reader = new FileReader();
-        reader.onload = function (event) {
-          const imgData = event.target.result;
-          if (y + 60 > 280) { // New page if space runs out
-            doc.addPage();
-            y = 10;
-          }
-          doc.addImage(imgData, "JPEG", 10, y, 90, 60);
-          y += 70;
-          if (i === photos.length - 1) {
-            doc.save(`${site}.pdf`);
-          }
-        };
-        reader.readAsDataURL(photos[i]);
-      }
-
-      if (photos.length === 0) {
-        doc.save(`${site}.pdf`);
-      }
+      // Generate and save the PDF
+      doc.save(`${site}.pdf`);
     });
   </script>
 </body>
