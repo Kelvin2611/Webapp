@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Form with PDF Generation</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+    #generate-pdf {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .preview-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .preview-images img {
+      max-width: 100px;
+      border: 1px solid #ddd;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Job Details Form</h1>
+  <form id="job-form">
+    <label for="site">Site:</label>
+    <input type="text" id="site" name="site" required>
+
+    <label for="client">Client:</label>
+    <input type="text" id="client" name="client" required>
+
+    <label for="client-po">Client PO Number (if known):</label>
+    <input type="text" id="client-po" name="client-po">
+
+    <label for="job-type">Job Type:</label>
+    <input type="text" id="job-type" name="job-type" required>
+
+    <label for="risk-assessment">Risk Assessment Carried Out?</label>
+    <select id="risk-assessment" name="risk-assessment">
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
+
+    <label for="works-carried-out">Works Carried Out:</label>
+    <textarea id="works-carried-out" name="works-carried-out"></textarea>
+
+    <label for="job-status">Job Complete or Further Works Required:</label>
+    <select id="job-status" name="job-status">
+      <option value="Complete">Complete</option>
+      <option value="Further Works Required">Further Works Required</option>
+    </select>
+
+    <label for="completed-on">Completed On:</label>
+    <input type="date" id="completed-on" name="completed-on" required>
+
+    <label>Client Signature:</label>
+    <canvas id="client-signature" width="400" height="100"></canvas>
+    <button type="button" onclick="clearCanvas('client-signature')">Clear Signature</button>
+
+    <label>Engineer Signature:</label>
+    <canvas id="engineer-signature" width="400" height="100"></canvas>
+    <button type="button" onclick="clearCanvas('engineer-signature')">Clear Signature</button>
+
+    <label for="photos">Add Photographs:</label>
+    <input type="file" id="photos" name="photos" accept="image/*" multiple>
+    <div class="preview-images" id="image-preview"></div>
+
+    <button type="button" id="generate-pdf">Generate PDF</button>
+  </form>
+
+  <script>
+    // Signature functionality
+    function enableSignature(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+      let isDrawing = false;
+
+      canvas.addEventListener("mousedown", () => { isDrawing = true; });
+      canvas.addEventListener("mouseup", () => { isDrawing = false; ctx.beginPath(); });
+      canvas.addEventListener("mousemove", (event) => {
+        if (!isDrawing) return;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "black";
+        ctx.lineTo(event.offsetX, event.offsetY);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(event.offsetX, event.offsetY);
+      });
+    }
+
+    function clearCanvas(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    enableSignature("client-signature");
+    enableSignature("engineer-signature");
+
+    // Photo preview functionality
+    const photoInput = document.getElementById("photos");
+    const previewContainer = document.getElementById("image-preview");
+
+    photoInput.addEventListener("change", () => {
+      previewContainer.innerHTML = "";
+      Array.from(photoInput.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          const img = document.createElement("img");
+          img.src = e.target.result;
+          previewContainer.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    });
+
+    // Generate PDF
+    document.getElementById("generate-pdf").addEventListener("click", function () {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Add logo to PDF
+      const logo = new Image();
+      logo.src = "TrickyLogo.jpg"; // Replace with the correct path to your logo file
+      logo.onload = function () {
+        doc.addImage(logo, "JPEG", 10, 10, 50, 20); // Adjust position and size as needed
+
+        // Form data
+        const site = document.getElementById("site").value;
+        const client = document.getElementById("client").value;
+        const clientPO = document.getElementById("client-po").value;
+        const jobType = document.getElementById("job-type").value;
+        const riskAssessment = document.getElementById("risk-assessment").value;
+        const worksCarriedOut = document.getElementById("works-carried-out").value;
+        const jobStatus = document.getElementById("job-status").value;
+        const completedOn = document.getElementById("completed-on").value;
+
+        // Add text to PDF
+        doc.text(`Site: ${site}`, 10, 40);
+        doc.text(`Client: ${client}`, 10, 50);
+        doc.text(`Client PO: ${clientPO}`, 10, 60);
+        doc.text(`Job Type: ${jobType}`, 10, 70);
+        doc.text(`Risk Assessment: ${riskAssessment}`, 10, 80);
+        doc.text(`Works Carried Out:`, 10, 90);
+        doc.text(worksCarriedOut, 10, 100);
+        doc.text(`Job Status: ${jobStatus}`, 10, 120);
+        doc.text(`Completed On: ${completedOn}`, 10, 130);
+
+        // Add signatures
+        const clientCanvas = document.getElementById("client-signature");
+        const engineerCanvas = document.getElementById("engineer-signature");
+        const clientSignature = clientCanvas.toDataURL("image/png");
+        const engineerSignature = engineerCanvas.toDataURL("image/png");
+
+        doc.addImage(clientSignature, "PNG", 10, 140, 90, 30);
+        doc.text("Client Signature", 10, 175);
+
+        doc.addImage(engineerSignature, "PNG", 10, 185, 90, 30);
+        doc.text("Engineer Signature", 10, 220);
+
+        // Add photos
+        let yPosition = 230;
+        Array.from(photoInput.files).forEach((file, index) => {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            const imgData = e.target.result;
+            doc.addImage(imgData, "JPEG", 10, yPosition, 90, 60);
+            yPosition += 70;
+            if (index === photoInput.files.length - 1) {
+              doc.save("job-details.pdf");
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+
+        // Save PDF if no images are uploaded
+        if (photoInput.files.length === 0) {
+          doc.save("job-details.pdf");
+        }
+      };
+    });
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
