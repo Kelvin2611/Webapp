@@ -129,8 +129,13 @@
       doc.text(`Engineer: ${engineer}`, 10, y); y += 10;
       doc.text(`Date Started: ${dateStarted}`, 10, y); y += 10;
       doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
-      doc.text("Works Carried Out:", 10, y); y += 10;
-      doc.text(worksCarriedOut, 10, y); y += 20;
+
+      // Handle "Works Carried Out" with text wrapping
+      const wrappedText = doc.splitTextToSize(worksCarriedOut, 180); // Wrap text within 180mm
+      doc.text("Works Carried Out:", 10, y); 
+      y += 10;
+      doc.text(wrappedText, 10, y);
+      y += wrappedText.length * 10;
 
       // Add photographs
       const photos = document.getElementById("photos").files;
