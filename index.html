@@ -110,8 +110,13 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Add the logo at the top-left corner
-      doc.addImage(logoBase64, "JPEG", 10, 10, 50, 20);
+      // Add the logo at the top-left corner (resized to 75% of original size)
+      doc.addImage(logoBase64, "JPEG", 10, 10, 37.5, 15); // Adjusted for 75% size
+
+      // Add the header to the top of the PDF
+      doc.setFont("Helvetica", "bold");
+      doc.setFontSize(16); // Set font size for the header
+      doc.text("Tricky Evolution Service Sheet", 10, 30); // Position the header below the logo
 
       // Add form details
       const site = document.getElementById("site").value;
