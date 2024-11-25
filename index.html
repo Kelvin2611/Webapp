@@ -30,10 +30,6 @@
       padding: 10px;
       font-size: 16px;
     }
-    canvas {
-      border: 1px solid #ccc;
-      margin-bottom: 15px;
-    }
     #generate-pdf {
       background-color: #4CAF50;
       color: white;
@@ -102,10 +98,6 @@
       <option value="Further Works Required">Further Works Required</option>
     </select>
 
-    <label>Client Signature:</label>
-    <canvas id="client-signature" width="400" height="100"></canvas>
-    <button type="button" onclick="clearCanvas('client-signature')">Clear Signature</button>
-
     <label for="photos">Add Photographs (up to 5):</label>
     <input type="file" id="photos" name="photos" accept="image/*" multiple>
     <button type="button" id="generate-pdf">Generate PDF</button>
@@ -113,53 +105,6 @@
 
   <script>
     const logoBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA6KADAAQAAAABAAAA2QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA2QDoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//..."; // Truncated for readability
-
-    function enableSignature(canvasId) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext("2d");
-      let isDrawing = false;
-
-      function startDrawing(event) {
-        isDrawing = true;
-        const rect = canvas.getBoundingClientRect();
-        const x = event.touches ? event.touches[0].clientX - rect.left : event.offsetX;
-        const y = event.touches ? event.touches[0].clientY - rect.top : event.offsetY;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-      }
-
-      function stopDrawing() {
-        isDrawing = false;
-      }
-
-      function draw(event) {
-        if (!isDrawing) return;
-        const rect = canvas.getBoundingClientRect();
-        const x = event.touches ? event.touches[0].clientX - rect.left : event.offsetX;
-        const y = event.touches ? event.touches[0].clientY - rect.top : event.offsetY;
-        ctx.lineTo(x, y);
-        ctx.stroke();
-      }
-
-      canvas.addEventListener("mousedown", startDrawing);
-      canvas.addEventListener("mouseup", stopDrawing);
-      canvas.addEventListener("mousemove", draw);
-
-      canvas.addEventListener("touchstart", (event) => startDrawing(event));
-      canvas.addEventListener("touchend", stopDrawing);
-      canvas.addEventListener("touchmove", (event) => {
-        event.preventDefault();
-        draw(event);
-      });
-    }
-
-    enableSignature("client-signature");
-
-    function clearCanvas(canvasId) {
-      const canvas = document.getElementById(canvasId);
-      const ctx = canvas.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    }
 
     document.getElementById("generate-pdf").addEventListener("click", function () {
       const { jsPDF } = window.jspdf;
@@ -170,10 +115,45 @@
 
       // Add form details
       const site = document.getElementById("site").value;
-      doc.text(`Site: ${site}`, 10, 40);
+      const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
+      const clientPO = document.getElementById("client-po").value;
+      const engineer = document.getElementById("engineer-name").value;
+      const dateStarted = document.getElementById("date-started").value;
+      const completedOn = document.getElementById("completed-on").value;
+      const worksCarriedOut = document.getElementById("works-carried-out").value;
 
-      // Generate and save the PDF
-      doc.save(`${site}.pdf`);
+      let y = 40;
+      doc.text(`Site: ${site}`, 10, y); y += 10;
+      doc.text(`Client: ${client}`, 10, y); y += 10;
+      doc.text(`Client PO Number: ${clientPO}`, 10, y); y += 10;
+      doc.text(`Engineer: ${engineer}`, 10, y); y += 10;
+      doc.text(`Date Started: ${dateStarted}`, 10, y); y += 10;
+      doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
+      doc.text("Works Carried Out:", 10, y); y += 10;
+      doc.text(worksCarriedOut, 10, y); y += 20;
+
+      // Add photographs
+      const photos = document.getElementById("photos").files;
+      for (let i = 0; i < photos.length; i++) {
+        const reader = new FileReader();
+        reader.onload = function (event) {
+          const imgData = event.target.result;
+          if (y + 60 > 280) { // New page if space runs out
+            doc.addPage();
+            y = 10;
+          }
+          doc.addImage(imgData, "JPEG", 10, y, 90, 60);
+          y += 70;
+          if (i === photos.length - 1) {
+            doc.save(`${site}.pdf`);
+          }
+        };
+        reader.readAsDataURL(photos[i]);
+      }
+
+      if (photos.length === 0) {
+        doc.save(`${site}.pdf`);
+      }
     });
   </script>
 </body>
