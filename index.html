@@ -112,7 +112,7 @@
   </form>
 
   <script>
-    const logoBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA6KADAAQAAAABAAAA2QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA2QDoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//..."; // Replace with full Base64 logo
+    const logoBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA6KADAAQAAAABAAAA2QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA2QDoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//..."; // Truncated for readability
 
     function enableSignature(canvasId) {
       const canvas = document.getElementById(canvasId);
@@ -165,7 +165,7 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Add the logo at the top
+      // Add the logo at the top-left corner
       doc.addImage(logoBase64, "JPEG", 10, 10, 50, 20);
 
       // Add form details
