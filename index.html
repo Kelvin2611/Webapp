@@ -192,22 +192,23 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      doc.addImage(logoBase64, "JPEG", 10, 10, 50, 20); // Add logo to header
+      // Add logo
+      doc.addImage(logoBase64, "JPEG", 10, 10, 50, 20);
 
-      addContentToPDF(doc);
-    });
-
-    function addContentToPDF(doc) {
+      // Add form data
       const site = document.getElementById("site").value;
       const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
       const engineer = document.getElementById("engineer-name").value;
-      const dateStarted = document.getElementById("date-started").value;
+      const worksCarriedOut = document.getElementById("works-carried-out").value;
 
       let y = 40;
       doc.text(`Site: ${site}`, 10, y); y += 10;
       doc.text(`Client: ${client}`, 10, y); y += 10;
       doc.text(`Engineer: ${engineer}`, 10, y); y += 10;
+      doc.text("Works Carried Out:", 10, y); y += 10;
+      doc.text(worksCarriedOut, 10, y); y += 20;
 
+      // Add photos
       const photos = document.getElementById("photos").files;
       for (let i = 0; i < photos.length; i++) {
         const reader = new FileReader();
@@ -229,7 +230,12 @@
       if (photos.length === 0) {
         doc.save(`${site}.pdf`);
       }
-    }
+    });
   </script>
 </body>
 </html>
+
+
+
+
+
