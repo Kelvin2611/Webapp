@@ -1,5 +1,5 @@
 <script>
-  document.getElementById("generate-pdf").addEventListener("click", async function () {
+  document.getElementById("generate-pdf").addEventListener("click", function () {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
@@ -48,46 +48,20 @@
         doc.addImage(imgData, "JPEG", 10, y, 90, 60);
         y += 70;
         if (i === photos.length - 1 || i === 4) {
-          saveAndSendPDF(doc, site, dateStarted);
+          savePDF(doc, site, dateStarted);
         }
       };
       reader.readAsDataURL(photos[i]);
     }
 
-    // If no photos are added, save and send PDF directly
+    // If no photos are added, save the PDF directly
     if (photos.length === 0) {
-      saveAndSendPDF(doc, site, dateStarted);
+      savePDF(doc, site, dateStarted);
     }
   });
 
-  function saveAndSendPDF(doc, site, dateStarted) {
+  function savePDF(doc, site, dateStarted) {
     const filename = `${site}-${dateStarted}.pdf`;
-    const pdfBlob = doc.output("blob");
-
-    // Create FormData to send the PDF to the backend
-    const formData = new FormData();
-    formData.append("pdf", pdfBlob, filename);
-    formData.append("site", site);
-    formData.append("date", dateStarted);
-
-    // Save the PDF locally and send it to the backend
     doc.save(filename);
-
-    // Send the PDF to the backend for emailing
-    fetch("http://localhost:3000/send-email", {
-      method: "POST",
-      body: formData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          alert("PDF generated and emailed successfully!");
-        } else {
-          alert("Failed to send the email. Please try again.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error sending email:", error);
-        alert("Error sending email. Check the console for details.");
-      });
   }
 </script>
