@@ -42,16 +42,6 @@
       padding: 10px;
       border-radius: 4px;
     }
-    .preview-images {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .preview-images img {
-      max-width: 100px;
-      border: 1px solid #ddd;
-      padding: 5px;
-    }
   </style>
 </head>
 <body>
@@ -94,6 +84,9 @@
     <label for="date-started">Date Started:</label>
     <input type="date" id="date-started" name="date-started" required>
 
+    <label for="completed-on">Completed On:</label>
+    <input type="date" id="completed-on" name="completed-on" required>
+
     <label for="risk-assessment">Risk Assessment Carried Out?</label>
     <select id="risk-assessment" name="risk-assessment">
       <option value="Yes">Yes</option>
@@ -109,24 +102,18 @@
       <option value="Further Works Required">Further Works Required</option>
     </select>
 
-    <label for="completed-on">Completed On:</label>
-    <input type="date" id="completed-on" name="completed-on" required>
-
     <label>Client Signature:</label>
     <canvas id="client-signature" width="400" height="100"></canvas>
     <button type="button" onclick="clearCanvas('client-signature')">Clear Signature</button>
 
     <label for="photos">Add Photographs (up to 5):</label>
     <input type="file" id="photos" name="photos" accept="image/*" multiple>
-    <div class="preview-images" id="image-preview"></div>
-
     <button type="button" id="generate-pdf">Generate PDF</button>
   </form>
 
   <script>
     const logoBase64 = "data:image/jpeg;base64,<BASE64_ENCODED_STRING_OF_LOGO>";
 
-    // Signature functionality with support for touchscreen devices
     function enableSignature(canvasId) {
       const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext("2d");
@@ -143,7 +130,6 @@
 
       function stopDrawing() {
         isDrawing = false;
-        ctx.beginPath();
       }
 
       function draw(event) {
@@ -151,9 +137,6 @@
         const rect = canvas.getBoundingClientRect();
         const x = event.touches ? event.touches[0].clientX - rect.left : event.offsetX;
         const y = event.touches ? event.touches[0].clientY - rect.top : event.offsetY;
-        ctx.lineWidth = 2;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = "black";
         ctx.lineTo(x, y);
         ctx.stroke();
       }
@@ -162,9 +145,7 @@
       canvas.addEventListener("mouseup", stopDrawing);
       canvas.addEventListener("mousemove", draw);
 
-      canvas.addEventListener("touchstart", (event) => {
-        startDrawing(event);
-      });
+      canvas.addEventListener("touchstart", (event) => startDrawing(event));
       canvas.addEventListener("touchend", stopDrawing);
       canvas.addEventListener("touchmove", (event) => {
         event.preventDefault();
@@ -172,49 +153,51 @@
       });
     }
 
+    enableSignature("client-signature");
+
     function clearCanvas(canvasId) {
       const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext("2d");
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
-    enableSignature("client-signature");
-
-    // Show "Other" client input
-    function showOtherClientInput() {
-      const clientSelect = document.getElementById("client");
-      const otherClientInput = document.getElementById("other-client");
-      otherClientInput.style.display = clientSelect.value === "Other" ? "block" : "none";
-    }
-
-    // Generate PDF and save locally
     document.getElementById("generate-pdf").addEventListener("click", function () {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
 
-      // Add logo
+      // Add the logo
       doc.addImage(logoBase64, "JPEG", 10, 10, 50, 20);
 
-      // Add form data
+      // Add form fields to PDF
       const site = document.getElementById("site").value;
       const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
       const engineer = document.getElementById("engineer-name").value;
+      const dateStarted = document.getElementById("date-started").value;
+      const completedOn = document.getElementById("completed-on").value;
       const worksCarriedOut = document.getElementById("works-carried-out").value;
 
       let y = 40;
       doc.text(`Site: ${site}`, 10, y); y += 10;
       doc.text(`Client: ${client}`, 10, y); y += 10;
       doc.text(`Engineer: ${engineer}`, 10, y); y += 10;
+      doc.text(`Date Started: ${dateStarted}`, 10, y); y += 10;
+      doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
       doc.text("Works Carried Out:", 10, y); y += 10;
       doc.text(worksCarriedOut, 10, y); y += 20;
 
-      // Add photos
+      // Add client signature
+      const clientCanvas = document.getElementById("client-signature");
+      const clientSignature = clientCanvas.toDataURL("image/png");
+      doc.addImage(clientSignature, "PNG", 10, y, 90, 30);
+      y += 40;
+
+      // Add photographs
       const photos = document.getElementById("photos").files;
       for (let i = 0; i < photos.length; i++) {
         const reader = new FileReader();
         reader.onload = function (event) {
           const imgData = event.target.result;
-          if (y + 60 > 280) { // Check if space is sufficient, else create a new page
+          if (y + 60 > 280) { // New page if space runs out
             doc.addPage();
             y = 10;
           }
@@ -234,8 +217,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
