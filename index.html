@@ -1,67 +1,213 @@
-<script>
-  document.getElementById("generate-pdf").addEventListener("click", function () {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF();
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Form with PDF Generation</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    form {
+      max-width: 600px;
+      margin: auto;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input, textarea, select, button {
+      width: 100%;
+      margin-bottom: 15px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin-bottom: 15px;
+    }
+    #generate-pdf {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .preview-images {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .preview-images img {
+      max-width: 100px;
+      border: 1px solid #ddd;
+      padding: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Job Details Form</h1>
+  <form id="job-form">
+    <label for="site">Site:</label>
+    <input type="text" id="site" name="site" required>
 
-    // Get form values
-    const site = document.getElementById("site").value;
-    const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
-    const clientPO = document.getElementById("client-po").value;
-    const jobType = document.getElementById("job-type").value;
-    const dateStarted = document.getElementById("date-started").value;
-    const riskAssessment = document.getElementById("risk-assessment").value;
-    const worksCarriedOut = document.getElementById("works-carried-out").value;
-    const jobStatus = document.getElementById("job-status").value;
-    const completedOn = document.getElementById("completed-on").value;
+    <label for="client">Client:</label>
+    <select id="client" name="client" onchange="showOtherClientInput()">
+      <option value="OCS">OCS</option>
+      <option value="Rank">Rank</option>
+      <option value="Rank Projects">Rank Projects</option>
+      <option value="CBRE">CBRE</option>
+      <option value="Cloud FM">Cloud FM</option>
+      <option value="Cloud Projects">Cloud Projects</option>
+      <option value="Other">Other</option>
+    </select>
+    <input type="text" id="other-client" name="other-client" placeholder="Specify other client" style="display: none;">
 
-    // Add form data to PDF
-    let y = 10; // Initial y position
-    doc.text(`Site: ${site}`, 10, y); y += 10;
-    doc.text(`Client: ${client}`, 10, y); y += 10;
-    doc.text(`Client PO: ${clientPO}`, 10, y); y += 10;
-    doc.text(`Job Type: ${jobType}`, 10, y); y += 10;
-    doc.text(`Date Started: ${dateStarted}`, 10, y); y += 10;
-    doc.text(`Risk Assessment: ${riskAssessment}`, 10, y); y += 10;
-    doc.text("Works Carried Out:", 10, y); y += 10;
-    doc.text(worksCarriedOut, 10, y); y += 20; // Allow space for multiline text
-    doc.text(`Job Status: ${jobStatus}`, 10, y); y += 10;
-    doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
+    <label for="client-po">Client PO Number (if known):</label>
+    <input type="text" id="client-po" name="client-po">
 
-    // Add signatures
-    const clientCanvas = document.getElementById("client-signature");
-    const engineerCanvas = document.getElementById("engineer-signature");
-    const clientSignature = clientCanvas.toDataURL("image/png");
-    const engineerSignature = engineerCanvas.toDataURL("image/png");
+    <label for="job-type">Job Type:</label>
+    <select id="job-type" name="job-type">
+      <option value="Reactive">Reactive</option>
+      <option value="Quoted">Quoted</option>
+    </select>
 
-    doc.addImage(clientSignature, "PNG", 10, y, 90, 30); y += 40;
-    doc.text("Client Signature", 10, y); y += 10;
+    <label for="date-started">Date Started:</label>
+    <input type="date" id="date-started" name="date-started" required>
 
-    doc.addImage(engineerSignature, "PNG", 10, y, 90, 30); y += 40;
-    doc.text("Engineer Signature", 10, y); y += 10;
+    <label for="risk-assessment">Risk Assessment Carried Out?</label>
+    <select id="risk-assessment" name="risk-assessment">
+      <option value="Yes">Yes</option>
+      <option value="No">No</option>
+    </select>
 
-    // Add photographs (up to 5)
-    const photos = document.getElementById("photos").files;
-    for (let i = 0; i < photos.length && i < 5; i++) {
-      const reader = new FileReader();
-      reader.onload = function (event) {
-        const imgData = event.target.result;
-        doc.addImage(imgData, "JPEG", 10, y, 90, 60);
-        y += 70;
-        if (i === photos.length - 1 || i === 4) {
-          savePDF(doc, site, dateStarted);
-        }
-      };
-      reader.readAsDataURL(photos[i]);
+    <label for="works-carried-out">Works Carried Out:</label>
+    <textarea id="works-carried-out" name="works-carried-out"></textarea>
+
+    <label for="job-status">Job Complete or Further Works Required:</label>
+    <select id="job-status" name="job-status">
+      <option value="Complete">Complete</option>
+      <option value="Further Works Required">Further Works Required</option>
+    </select>
+
+    <label for="completed-on">Completed On:</label>
+    <input type="date" id="completed-on" name="completed-on" required>
+
+    <label>Client Signature:</label>
+    <canvas id="client-signature" width="400" height="100"></canvas>
+    <button type="button" onclick="clearCanvas('client-signature')">Clear Signature</button>
+
+    <label>Engineer Signature:</label>
+    <canvas id="engineer-signature" width="400" height="100"></canvas>
+    <button type="button" onclick="clearCanvas('engineer-signature')">Clear Signature</button>
+
+    <label for="photos">Add Photographs (up to 5):</label>
+    <input type="file" id="photos" name="photos" accept="image/*" multiple>
+    <div class="preview-images" id="image-preview"></div>
+
+    <button type="button" id="generate-pdf">Generate PDF</button>
+  </form>
+
+  <script>
+    // Signature functionality for touchscreen compatibility
+    function enableSignature(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+      let isDrawing = false;
+
+      function startDrawing(event) {
+        isDrawing = true;
+        ctx.beginPath();
+        ctx.moveTo(event.offsetX, event.offsetY);
+      }
+
+      function stopDrawing() {
+        isDrawing = false;
+      }
+
+      function draw(event) {
+        if (!isDrawing) return;
+        ctx.lineWidth = 2;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "black";
+        ctx.lineTo(event.offsetX, event.offsetY);
+        ctx.stroke();
+      }
+
+      canvas.addEventListener("mousedown", startDrawing);
+      canvas.addEventListener("mouseup", stopDrawing);
+      canvas.addEventListener("mousemove", draw);
+
+      canvas.addEventListener("touchstart", (event) => {
+        const touch = event.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        ctx.beginPath();
+        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      });
+
+      canvas.addEventListener("touchmove", (event) => {
+        event.preventDefault();
+        const touch = event.touches[0];
+        const rect = canvas.getBoundingClientRect();
+        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+        ctx.stroke();
+      });
     }
 
-    // If no photos are added, save the PDF directly
-    if (photos.length === 0) {
-      savePDF(doc, site, dateStarted);
+    function clearCanvas(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
-  });
 
-  function savePDF(doc, site, dateStarted) {
-    const filename = `${site}-${dateStarted}.pdf`;
-    doc.save(filename);
-  }
-</script>
+    enableSignature("client-signature");
+    enableSignature("engineer-signature");
+
+    // Show "Other" client input
+    function showOtherClientInput() {
+      const clientSelect = document.getElementById("client");
+      const otherClientInput = document.getElementById("other-client");
+      otherClientInput.style.display = clientSelect.value === "Other" ? "block" : "none";
+    }
+
+    // Generate PDF and save locally
+    document.getElementById("generate-pdf").addEventListener("click", function () {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      // Get form values
+      const site = document.getElementById("site").value;
+      const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
+      const clientPO = document.getElementById("client-po").value;
+      const jobType = document.getElementById("job-type").value;
+      const dateStarted = document.getElementById("date-started").value;
+      const riskAssessment = document.getElementById("risk-assessment").value;
+      const worksCarriedOut = document.getElementById("works-carried-out").value;
+      const jobStatus = document.getElementById("job-status").value;
+      const completedOn = document.getElementById("completed-on").value;
+
+      // Add form data to PDF
+      let y = 10; // Initial y position
+      doc.text(`Site: ${site}`, 10, y); y += 10;
+      doc.text(`Client: ${client}`, 10, y); y += 10;
+      doc.text(`Client PO: ${clientPO}`, 10, y); y += 10;
+      doc.text(`Job Type: ${jobType}`, 10, y); y += 10;
+      doc.text(`Date Started: ${dateStarted}`, 10, y); y += 10;
+      doc.text(`Risk Assessment: ${riskAssessment}`, 10, y); y += 10;
+      doc.text("Works Carried Out:", 10, y); y += 10;
+      doc.text(worksCarriedOut, 10, y); y += 20; // Allow space for multiline text
+      doc.text(`Job Status: ${jobStatus}`, 10, y); y += 10;
+      doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
+
+      // Add signatures
+      const clientCanvas = document.getElementById("client-signature");
+      const engineerCanvas = document.getElementById("engineer-signature");
+      const clientSignature = clientCanvas.toDataURL("image/png");
+      const engineerSignature = engineerCanvas.toDataURL("image/png");
+
+      doc.addImage(clientSignature, "PNG", 10, y, 90, 30); y += 40;
+      doc.text("Client Signature", 10, y); y += 10;
+
+      doc.addImage(engineerSignature, "PNG",
