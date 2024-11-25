@@ -9,10 +9,15 @@
     body {
       font-family: Arial, sans-serif;
       margin: 20px;
+      background-color: #d3f3fc; /* Light blue background */
     }
     form {
       max-width: 600px;
       margin: auto;
+      background-color: #ffffff; /* White form background */
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     }
     label {
       display: block;
@@ -34,6 +39,8 @@
       color: white;
       border: none;
       cursor: pointer;
+      padding: 10px;
+      border-radius: 4px;
     }
     .preview-images {
       display: flex;
@@ -48,7 +55,7 @@
   </style>
 </head>
 <body>
-  <h1>Job Details Form</h1>
+  <h1 style="text-align: center; color: #0077b6;">Job Details Form</h1>
   <form id="job-form">
     <label for="site">Site:</label>
     <input type="text" id="site" name="site" required>
@@ -72,6 +79,16 @@
     <select id="job-type" name="job-type">
       <option value="Reactive">Reactive</option>
       <option value="Quoted">Quoted</option>
+    </select>
+
+    <label for="engineer-name">Engineer Name:</label>
+    <select id="engineer-name" name="engineer-name">
+      <option value="Paul Stacey">Paul Stacey</option>
+      <option value="Richard Harrison">Richard Harrison</option>
+      <option value="Kelvin Satchwell">Kelvin Satchwell</option>
+      <option value="Aaron Perrin">Aaron Perrin</option>
+      <option value="Nick Green">Nick Green</option>
+      <option value="Luigi Bernone">Luigi Bernone</option>
     </select>
 
     <label for="date-started">Date Started:</label>
@@ -98,10 +115,6 @@
     <label>Client Signature:</label>
     <canvas id="client-signature" width="400" height="100"></canvas>
     <button type="button" onclick="clearCanvas('client-signature')">Clear Signature</button>
-
-    <label>Engineer Signature:</label>
-    <canvas id="engineer-signature" width="400" height="100"></canvas>
-    <button type="button" onclick="clearCanvas('engineer-signature')">Clear Signature</button>
 
     <label for="photos">Add Photographs (up to 5):</label>
     <input type="file" id="photos" name="photos" accept="image/*" multiple>
@@ -166,7 +179,6 @@
     }
 
     enableSignature("client-signature");
-    enableSignature("engineer-signature");
 
     // Show "Other" client input
     function showOtherClientInput() {
@@ -188,10 +200,13 @@
     function addContentToPDF(doc) {
       const site = document.getElementById("site").value;
       const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
+      const engineer = document.getElementById("engineer-name").value;
+      const dateStarted = document.getElementById("date-started").value;
 
       let y = 40;
       doc.text(`Site: ${site}`, 10, y); y += 10;
       doc.text(`Client: ${client}`, 10, y); y += 10;
+      doc.text(`Engineer: ${engineer}`, 10, y); y += 10;
 
       const photos = document.getElementById("photos").files;
       for (let i = 0; i < photos.length; i++) {
