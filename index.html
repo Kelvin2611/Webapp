@@ -112,7 +112,7 @@
   </form>
 
   <script>
-    const logoBase64 = "data:image/jpeg;base64,<BASE64_ENCODED_STRING_OF_LOGO>";
+    const logoBase64 = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAASABIAAD/4QBMRXhpZgAATU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAA6KADAAQAAAABAAAA2QAAAAD/7QA4UGhvdG9zaG9wIDMuMAA4QklNBAQAAAAAAAA4QklNBCUAAAAAABDUHYzZjwCyBOmACZjs+EJ+/8AAEQgA2QDoAwEiAAIRAQMRAf/EAB8AAAEFAQEBAQEBAAAAAAAAAAABAgMEBQYHCAkKC//EALUQAAIBAwMCBAMFBQQEAAABfQECAwAEEQUSITFBBhNRYQcicRQygZGhCCNCscEVUtHwJDNicoIJChYXGBkaJSYnKCkqNDU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6g4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2drh4uPk5ebn6Onq8fLz9PX29/j5+v/EAB8BAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKC//EALURAAIBAgQEAwQHBQQEAAECdwABAgMRBAUhMQYSQVEHYXETIjKBCBRCkaGxwQkjM1LwFWJy0QoWJDThJfEXGBkaJicoKSo1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoKDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uLj5OXm5+jp6vLz9PX29/j5+v/bAEMAAgICAgICAwICAwUDAwMFBgUFBQUGCAYGBgYGCAoICAgICAgKCgoKCgoKCgwMDAwMDA4ODg4ODw8PDw8PDw8PD//bAEMBAgICBAQEBwQEBxALCQsQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEP/dAAQAD//aAAwDAQACEQMRAD8A/OOiiigA..."; // Truncated for readability
 
     function enableSignature(canvasId) {
       const canvas = document.getElementById(canvasId);
@@ -171,6 +171,7 @@
       // Add form fields to PDF
       const site = document.getElementById("site").value;
       const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
+      const clientPO = document.getElementById("client-po").value;
       const engineer = document.getElementById("engineer-name").value;
       const dateStarted = document.getElementById("date-started").value;
       const completedOn = document.getElementById("completed-on").value;
@@ -179,6 +180,7 @@
       let y = 40;
       doc.text(`Site: ${site}`, 10, y); y += 10;
       doc.text(`Client: ${client}`, 10, y); y += 10;
+      doc.text(`Client PO Number: ${clientPO}`, 10, y); y += 10;
       doc.text(`Engineer: ${engineer}`, 10, y); y += 10;
       doc.text(`Date Started: ${dateStarted}`, 10, y); y += 10;
       doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
