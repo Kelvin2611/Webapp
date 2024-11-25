@@ -117,18 +117,23 @@
       const site = document.getElementById("site").value;
       const client = document.getElementById("client").value === "Other" ? document.getElementById("other-client").value : document.getElementById("client").value;
       const clientPO = document.getElementById("client-po").value;
+      const jobType = document.getElementById("job-type").value;
       const engineer = document.getElementById("engineer-name").value;
       const dateStarted = document.getElementById("date-started").value;
       const completedOn = document.getElementById("completed-on").value;
+      const riskAssessment = document.getElementById("risk-assessment").value;
       const worksCarriedOut = document.getElementById("works-carried-out").value;
+      const jobStatus = document.getElementById("job-status").value;
 
       let y = 40;
       doc.text(`Site: ${site}`, 10, y); y += 10;
       doc.text(`Client: ${client}`, 10, y); y += 10;
       doc.text(`Client PO Number: ${clientPO}`, 10, y); y += 10;
+      doc.text(`Job Type: ${jobType}`, 10, y); y += 10;
       doc.text(`Engineer: ${engineer}`, 10, y); y += 10;
       doc.text(`Date Started: ${dateStarted}`, 10, y); y += 10;
       doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
+      doc.text(`Risk Assessment Carried Out: ${riskAssessment}`, 10, y); y += 10;
 
       // Handle "Works Carried Out" with text wrapping
       const wrappedText = doc.splitTextToSize(worksCarriedOut, 180); // Wrap text within 180mm
@@ -136,6 +141,8 @@
       y += 10;
       doc.text(wrappedText, 10, y);
       y += wrappedText.length * 10;
+
+      doc.text(`Job Status: ${jobStatus}`, 10, y); y += 10;
 
       // Add photographs
       const photos = document.getElementById("photos").files;
