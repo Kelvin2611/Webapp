@@ -111,48 +111,57 @@
   </form>
 
   <script>
-    // Signature functionality for touchscreen compatibility
+    // Signature functionality with touchscreen compatibility
     function enableSignature(canvasId) {
       const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext("2d");
       let isDrawing = false;
 
-      function startDrawing(event) {
+      const startDrawing = (event) => {
         isDrawing = true;
+        const { offsetX, offsetY } = getEventCoordinates(event, canvas);
         ctx.beginPath();
-        ctx.moveTo(event.offsetX, event.offsetY);
-      }
+        ctx.moveTo(offsetX, offsetY);
+      };
 
-      function stopDrawing() {
+      const stopDrawing = () => {
         isDrawing = false;
-      }
+      };
 
-      function draw(event) {
+      const draw = (event) => {
         if (!isDrawing) return;
+        const { offsetX, offsetY } = getEventCoordinates(event, canvas);
         ctx.lineWidth = 2;
         ctx.lineCap = "round";
         ctx.strokeStyle = "black";
-        ctx.lineTo(event.offsetX, event.offsetY);
+        ctx.lineTo(offsetX, offsetY);
         ctx.stroke();
-      }
+      };
+
+      const getEventCoordinates = (event, canvas) => {
+        const rect = canvas.getBoundingClientRect();
+        if (event.touches) {
+          const touch = event.touches[0];
+          return {
+            offsetX: touch.clientX - rect.left,
+            offsetY: touch.clientY - rect.top,
+          };
+        } else {
+          return {
+            offsetX: event.offsetX,
+            offsetY: event.offsetY,
+          };
+        }
+      };
 
       canvas.addEventListener("mousedown", startDrawing);
       canvas.addEventListener("mouseup", stopDrawing);
       canvas.addEventListener("mousemove", draw);
-
-      canvas.addEventListener("touchstart", (event) => {
-        const touch = event.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        ctx.beginPath();
-        ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-      });
-
+      canvas.addEventListener("touchstart", startDrawing);
+      canvas.addEventListener("touchend", stopDrawing);
       canvas.addEventListener("touchmove", (event) => {
         event.preventDefault();
-        const touch = event.touches[0];
-        const rect = canvas.getBoundingClientRect();
-        ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-        ctx.stroke();
+        draw(event);
       });
     }
 
@@ -198,16 +207,4 @@
       doc.text(`Risk Assessment: ${riskAssessment}`, 10, y); y += 10;
       doc.text("Works Carried Out:", 10, y); y += 10;
       doc.text(worksCarriedOut, 10, y); y += 20; // Allow space for multiline text
-      doc.text(`Job Status: ${jobStatus}`, 10, y); y += 10;
-      doc.text(`Completed On: ${completedOn}`, 10, y); y += 10;
-
-      // Add signatures
-      const clientCanvas = document.getElementById("client-signature");
-      const engineerCanvas = document.getElementById("engineer-signature");
-      const clientSignature = clientCanvas.toDataURL("image/png");
-      const engineerSignature = engineerCanvas.toDataURL("image/png");
-
-      doc.addImage(clientSignature, "PNG", 10, y, 90, 30); y += 40;
-      doc.text("Client Signature", 10, y); y += 10;
-
-      doc.addImage(engineerSignature, "PNG",
+      doc.text(`Job Status: ${jobStatus}`, 
